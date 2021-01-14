@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, makeStyles, Typography } from '@material-ui/core';
+import { Button, Grid, makeStyles, Typography } from '@material-ui/core';
 import Marker from '../marker';
 import { PLAYERS } from '../../../static/players';
 
@@ -18,7 +18,7 @@ const useStyles = makeStyles(theme => ({
         borderBottom: `4px solid black`
     },
     gridMargin: {
-        marginTop: 50
+        marginTop: 30
     }
 }));
 
@@ -125,6 +125,8 @@ const Board = () => {
         return false;
     };
 
+    const restartGame = () => window.location.reload();
+
     return (
         <Grid container alignItems="center" justify="center" direction="column">
             <Grid container className={classes.root}>
@@ -144,6 +146,11 @@ const Board = () => {
                 <Typography variant="h4" gutterBottom>
                     {status}
                 </Typography>
+            </Grid>
+            <Grid className={classes.gridMargin} container alignItems="center" justify="center" direction="row">
+                <Button variant="contained" onClick={restartGame}>
+                    Restart
+                </Button>
             </Grid>
         </Grid>
     );
