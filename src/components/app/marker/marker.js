@@ -2,10 +2,11 @@ import React, { useEffect } from 'react';
 import Circle from '@material-ui/icons/RadioButtonUnchecked';
 import Cross from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core';
+import { PLAYERS } from '../../../lib/common/helper';
 
 const useStyles = makeStyles(() => ({
     root: {
-        padding: `2em`,
+        padding: `1.5em`,
         textAlign: 'center'
     },
     icon: {
@@ -25,8 +26,8 @@ const Marker = props => {
 
     return (
         <div className={classes.root}>
-            {props.value === 'X' && <Cross className={classes.icon} />}
-            {props.value === 'O' && <Circle className={classes.icon} />}
+            {props.value === PLAYERS.HUMAN && <Cross className={classes.icon} />}
+            {props.value === PLAYERS.AI && <Circle className={classes.icon} />}
             {props.value === '' && <Cross className={classes.invi} />}
         </div>
     );

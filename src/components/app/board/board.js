@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Button, Grid, makeStyles, Typography } from '@material-ui/core';
 import Marker from '../marker';
-import { PLAYERS } from '../../../static/players';
+import { checkForWin, containsEmptySpace, PLAYERS } from '../../../lib/common/helper';
+import AI from '../../../lib/ai/ai';
+
 
 const useStyles = makeStyles(theme => ({
     root: {
-        height: 400,
-        width: 400,
+        height: 360,
+        width: 360,
         padding: '1em'
     },
     vert: {
@@ -25,10 +27,13 @@ const useStyles = makeStyles(theme => ({
 
 const Board = () => {
     const classes = useStyles();
-    const [playerTurn, setPlayerTurn] = React.useState(PLAYERS[0]);
+    const ai = new AI();
+    const [aiFirstMove, setAiFirstMove] = React.useState(true);
+    const [playerTurn, setPlayerTurn] = React.useState(PLAYERS.HUMAN);
     const [gameOver, setGameOver] = React.useState(false);
+    const [isDraw, setIsDraw] = React.useState(false);
     const [status, setStatus] = React.useState(`Your Turn`);
-    const [winningCord, setWinningCord] = React.useState('');
+    const [winningCord, setWinningCord] = React.useState(null);
     const [boardState, setBoardState] = React.useState(() => {
         let b = [];
         for (let i = 0; i < 3; i++) {
@@ -41,81 +46,29 @@ const Board = () => {
         return b;
     });
 
-    const getCurrentPlayerMove = () => playerTurn === PLAYERS[0] ? "O" : "X";
+    const playerClick = (y, x) => playerTurn === PLAYERS.HUMAN && makeMove(y, x);
 
     const makeMove = (y, x) => {
         if (!gameOver) {
             let currentBoard = [...boardState];
             if (currentBoard[y][x] === '') {
-                currentBoard[y][x] = getCurrentPlayerMove();
+                currentBoard[y][x] = playerTurn;
                 setBoardState(currentBoard);
-                if (checkForWin(currentBoard, getCurrentPlayerMove())) {
+                const winStatus = checkForWin(currentBoard, playerTurn);
+                if (winStatus.isWin) {
                     setGameOver(true);
-                    setStatus(`${playerTurn === PLAYERS[0] ? `YOU` : `AI`} WON!`);
+                    setWinningCord(winStatus.winningCord);
+                    setStatus(`${playerTurn === PLAYERS.HUMAN ? `YOU` : `AI`} WON!`);
                 } else if (!containsEmptySpace(currentBoard)) {
                     setGameOver(true);
+                    setIsDraw(true);
                     setStatus(`DRAW!`);
                 } else {
-                    setPlayerTurn(playerTurn === PLAYERS[0] ? PLAYERS[1] : PLAYERS[0]);
+                    setPlayerTurn(playerTurn === PLAYERS.HUMAN ? PLAYERS.AI : PLAYERS.HUMAN);
                     setStatus(status === `Your Turn` ? `AI's turn` : `Your Turn`);
                 }
             }
         }
-    };
-
-    const checkForWin = (currentBoard, moveToCheck) => {
-        for (let i = 0; i < currentBoard.length; i++) {
-            // check horizontal (vertical on board GUI)
-            if (currentBoard[i][0] === moveToCheck && currentBoard[i][1] === moveToCheck && currentBoard[i][2] === moveToCheck) {
-                setWinningCord([
-                    [i, 0],
-                    [i, 1],
-                    [i, 2]
-                ]);
-                return true;
-            }
-
-            // check vertical (horizontal on board GUI)
-            if (currentBoard[0][i] === moveToCheck && currentBoard[1][i] === moveToCheck && currentBoard[2][i] === moveToCheck) {
-                setWinningCord([
-                    [0, i],
-                    [1, i],
-                    [2, i]
-                ]);
-                return true;
-            }
-        }
-        // check diagonal 
-        if (currentBoard[0][0] === moveToCheck && currentBoard[1][1] === moveToCheck && currentBoard[2][2] === moveToCheck) {
-            setWinningCord([
-                [0, 0],
-                [1, 1],
-                [2, 2]
-            ]);
-            return true;
-        }
-
-        // check anti diagonal
-        if (currentBoard[2][0] === moveToCheck && currentBoard[1][1] === moveToCheck && currentBoard[0][2] === moveToCheck) {
-            setWinningCord([
-                [2, 0],
-                [1, 1],
-                [0, 2]
-            ]);
-            return true;
-        }
-
-        return false;
-    };
-
-    const containsEmptySpace = currentBoard => {
-        for (let i = 0; i < currentBoard.length; i++) {
-            for (let j = 0; j < currentBoard[i].length; j++) {
-                if (currentBoard[i][j] === '')
-                    return true;
-            }
-        }
-        return false;
     };
 
     const isWinningSquare = arr => {
@@ -127,14 +80,24 @@ const Board = () => {
 
     const restartGame = () => window.location.reload();
 
+    useEffect(() => {
+        if (playerTurn === PLAYERS.AI) {
+            let aiMove = ai.makeMove(JSON.parse(JSON.stringify(boardState)), aiFirstMove);
+            if (aiFirstMove) setAiFirstMove(false);
+            makeMove(aiMove[0], aiMove[1]);
+        }
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [playerTurn]);
+
     return (
         <Grid container alignItems="center" justify="center" direction="column">
             <Grid container className={classes.root}>
                 {boardState.map((i, vPoint) => (
                     <Grid item xs={4} key={vPoint} className={vPoint === 1 ? classes.vert : ''}>
                         {i.map((j, hPoint) => (
-                            <Grid item xs={12} key={hPoint} className={hPoint === 1 ? classes.hori : ''} onClick={() => makeMove(vPoint, hPoint)}
-                                style={gameOver && isWinningSquare([vPoint, hPoint]) ? { color: 'red' } : {}}
+                            <Grid item xs={12} key={hPoint} className={hPoint === 1 ? classes.hori : ''} onClick={() => playerClick(vPoint, hPoint)}
+                                style={gameOver && !isDraw && isWinningSquare([vPoint, hPoint]) ? { color: `red` } : {}}
                             >
                                 <Marker value={j} />
                             </Grid>
