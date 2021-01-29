@@ -43,16 +43,18 @@ const Board = () => {
             }
             b.push(row);
         }
+        console.log(b);
         return b;
     });
 
-    const playerClick = (y, x) => playerTurn === PLAYERS.HUMAN && makeMove(y, x);
+    const playerClick = (i, j) => playerTurn === PLAYERS.HUMAN && makeMove(i, j);
 
-    const makeMove = (y, x) => {
+    const makeMove = (i, j) => {
+        // console.log(boardState); remove me
         if (!gameOver) {
             let currentBoard = [...boardState];
-            if (currentBoard[y][x] === '') {
-                currentBoard[y][x] = playerTurn;
+            if (currentBoard[i][j] === '') {
+                currentBoard[i][j] = playerTurn;
                 setBoardState(currentBoard);
                 const winStatus = checkForWin(currentBoard, playerTurn);
                 if (winStatus.isWin) {
@@ -93,13 +95,13 @@ const Board = () => {
     return (
         <Grid container alignItems="center" justify="center" direction="column">
             <Grid container className={classes.root}>
-                {boardState.map((i, vPoint) => (
-                    <Grid item xs={4} key={vPoint} className={vPoint === 1 ? classes.vert : ''}>
-                        {i.map((j, hPoint) => (
-                            <Grid item xs={12} key={hPoint} className={hPoint === 1 ? classes.hori : ''} onClick={() => playerClick(vPoint, hPoint)}
-                                style={gameOver && !isDraw && isWinningSquare([vPoint, hPoint]) ? { color: `red` } : {}}
+                {boardState.map((column, colIndex) => (
+                    <Grid item xs={4} key={colIndex} className={colIndex === 1 ? classes.vert : ''}>
+                        {column.map((row, rowIndex) => (
+                            <Grid item xs={12} key={rowIndex} className={rowIndex === 1 ? classes.hori : ''} onClick={() => playerClick(colIndex, rowIndex)}
+                                style={gameOver && !isDraw && isWinningSquare([colIndex, rowIndex]) ? { color: `red` } : {}}
                             >
-                                <Marker value={j} />
+                                <Marker value={row} />
                             </Grid>
                         ))}
                     </Grid>
