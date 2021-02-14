@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { Button, Grid, makeStyles, Typography } from '@material-ui/core';
-import Marker from '../marker';
 import { checkForWin, containsEmptySpace, PLAYERS } from '../../../lib/common/helper';
 import AI from '../../../lib/ai/ai';
+const Marker = React.lazy(() => import('../marker'));
 
 
 const useStyles = makeStyles(theme => ({
@@ -101,7 +101,7 @@ const Board = () => {
                             <Grid item xs={12} key={rowIndex} className={rowIndex === 1 ? classes.hori : ''} onClick={() => playerClick(colIndex, rowIndex)}
                                 style={gameOver && !isDraw && isWinningSquare([colIndex, rowIndex]) ? { color: `red` } : {}}
                             >
-                                <Marker value={row} />
+                                <Marker value={row} blink={gameOver && !isDraw && isWinningSquare([colIndex, rowIndex]) ? true : false} />
                             </Grid>
                         ))}
                     </Grid>
