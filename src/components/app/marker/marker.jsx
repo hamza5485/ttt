@@ -3,6 +3,7 @@ import Circle from '@material-ui/icons/RadioButtonUnchecked';
 import Cross from '@material-ui/icons/Close';
 import { makeStyles } from '@material-ui/core';
 import { PLAYERS } from '../../../lib/common/helper';
+import './styles.css'
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -26,8 +27,8 @@ const Marker = props => {
 
     return (
         <div className={classes.root}>
-            {props.value === PLAYERS.HUMAN && <Cross className={classes.icon} />}
-            {props.value === PLAYERS.AI && <Circle className={classes.icon} />}
+            <div className={props.blink ? "blinking" : ""}>{props.value === PLAYERS.HUMAN && <Cross className={classes.icon} />}</div>
+            <div className={props.blink ? "blinking" : ""}>{props.value === PLAYERS.AI && <Circle className={classes.icon} />}</div>
             {props.value === '' && <Cross className={classes.invi} />}
         </div>
     );
